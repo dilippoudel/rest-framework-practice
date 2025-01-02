@@ -2,7 +2,7 @@
 
 from rest_framework import serializers
 from snippets.models import Snippet, LANGUAGE_CHOICES, STYLE_CHOICES
-
+from django.contrib.auth.models import User
 
 # class SnippetSerializer(serializers.Serializer):
 #     id = serializers.IntegerField(read_only=True)
@@ -14,7 +14,8 @@ from snippets.models import Snippet, LANGUAGE_CHOICES, STYLE_CHOICES
 class SnippetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Snippet
-        fields = ['id', 'title', 'code', 'linenos', 'style']
+        owner = serializers.ReadOnlyField(source='owner.username')
+        fields = ['id', 'title', 'code', 'linenos', 'style', 'owner']
 
     def create(self, validated_data):
         """Create and return a new snippet instance, given the validated data."""
@@ -30,3 +31,11 @@ class SnippetSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+
+
+class UserSerializer(serializers.ModelSerializer):
+    snippets = serializers.PrimaryKeyRelatedField(many=True, queryset=Snippet.objects.all())
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'snippets']
