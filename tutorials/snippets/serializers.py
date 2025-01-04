@@ -12,9 +12,9 @@ from django.contrib.auth.models import User
 #     language = serializers.ChoiceField(choices=LANGUAGE_CHOICES, default='python')
 #     style = serializers.ChoiceField(choices=STYLE_CHOICES, default='friendly')
 class SnippetSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
     class Meta:
         model = Snippet
-        owner = serializers.ReadOnlyField(source='owner.username')
         fields = ['id', 'title', 'code', 'linenos', 'style', 'owner']
 
     def create(self, validated_data):
