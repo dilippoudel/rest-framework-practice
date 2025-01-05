@@ -11,11 +11,12 @@ from django.contrib.auth.models import User
 #     linenos = serializers.BooleanField(required=False)
 #     language = serializers.ChoiceField(choices=LANGUAGE_CHOICES, default='python')
 #     style = serializers.ChoiceField(choices=STYLE_CHOICES, default='friendly')
-class SnippetSerializer(serializers.ModelSerializer):
+class SnippetSerializer(serializers.HyperlinkedModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
+    highlight = serializers.HyperlinkedIdentityField(view_name='snippet-highlight', format='html')
     class Meta:
         model = Snippet
-        fields = ['id', 'title', 'code', 'linenos', 'style', 'owner']
+        fields = ['url', 'id', 'highlight', 'title', 'code', 'linenos', 'style', 'owner']
 
     def create(self, validated_data):
         """Create and return a new snippet instance, given the validated data."""
@@ -33,9 +34,9 @@ class SnippetSerializer(serializers.ModelSerializer):
 
 
 
-class UserSerializer(serializers.ModelSerializer):
-    snippets = serializers.PrimaryKeyRelatedField(many=True, queryset=Snippet.objects.all())
+class UserSerializer(serializers.HyperlinkedModelSerializer):
+    snippets = serializers.HyperlinkedRelatedField(many=True, view_name='snippet-detail', read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'snippets']
+        fields = ['url', 'id', 'username', 'snippets']
